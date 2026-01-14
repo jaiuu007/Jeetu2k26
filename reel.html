@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Meow Concert 😼</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Chewy&family=Fredoka+One&display=swap" rel="stylesheet">
+
+    <style>
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            height: 100vh;
+            height: 100dvh; /* Mobile friendly height */
+            
+            /* Background Image */
+            background: url('bg4.jpg') no-repeat center center/cover;
+            
+            /* Layout: Stack from bottom up */
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end; 
+            align-items: center;
+            overflow: hidden;
+            font-family: 'Chewy', cursive;
+        }
+
+        /* --- 1. GIF (Top) --- */
+        .cat-gif {
+            width: 310px;
+            height: auto;
+            /* No margin bottom needed as text usually has line-height, 
+               but added small one just in case */
+            margin-bottom: 5px; 
+            z-index: 10;
+            filter: drop-shadow(0 5px 15px rgba(0,0,0,0.3));
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        /* --- 2. TEXT (Middle) --- */
+        .bouncing-text {
+            font-size: 2.2rem;
+            text-align: center;
+            font-weight: 900;
+            line-height: 1.2;
+            padding: 0 15px;
+            
+            /* Space between Text and Buttons */
+            margin: 0 0 20px 0; 
+            
+            background: linear-gradient(to right, #000000, #434343);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(2px 2px 0px rgba(255,255,255,0.4));
+            
+            animation: bounce 1s infinite alternate;
+            z-index: 10;
+        }
+
+        @keyframes bounce {
+            from { transform: translateY(0); }
+            to { transform: translateY(-10px); }
+        }
+
+        /* --- 3. BUTTONS (Above Video) --- */
+        .controls {
+            display: flex;
+            gap: 15px; /* Space between the two buttons */
+            z-index: 10;
+            
+            /* Space between Buttons and Video Container */
+            margin-bottom: 20px; 
+        }
+
+        .btn {
+            padding: 10px 25px;
+            font-size: 1.1rem;
+            font-family: 'Fredoka One', cursive;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            transition: transform 0.1s;
+        }
+        .btn:active { transform: scale(0.95); }
+
+        .skip-btn {
+            background: linear-gradient(45deg, #FF512F, #DD2476);
+            color: white;
+            animation: pulse 2s infinite;
+        }
+
+        .unmute-btn {
+            background: rgba(255, 255, 255, 0.9);
+            color: black;
+            border: 2px solid black;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(221, 36, 118, 0.7); }
+            70% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(221, 36, 118, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(221, 36, 118, 0); }
+        }
+
+        /* --- 4. VIDEO CONTAINER (Bottom) --- */
+        .video-container {
+            width: 100%;
+            /* Limit height so text/buttons aren't pushed off screen on small phones */
+            max-height: 55vh; 
+            aspect-ratio: 16/9;
+            background: black;
+            box-shadow: 0 -10px 40px rgba(0,0,0,0.6);
+            z-index: 5;
+            
+            /* Only round the top corners */
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
+            
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+        }
+
+        video {
+            width: 100%;
+            height: 100%;
+            /* Ensure full video is visible without cropping */
+            object-fit: contain; 
+        }
+        
+    </style>
+</head>
+<body>
+
+    <img src="catt.gif" alt="Dancing Cat" class="cat-gif">
+
+    <h1 class="bouncing-text">Meow concert for meouhh😼</h1>
+    
+    <div class="controls">
+        <button id="unmuteBtn" class="btn unmute-btn" onclick="toggleSound()">Tap for Sound 🔊</button>
+        <button class="btn skip-btn" onclick="redirect()">Go to Reels ➡</button>
+    </div>
+
+    <div class="video-container">
+        <video id="concertVideo" autoplay playsinline muted>
+            <source src="concert.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+    </div>
+
+    <script>
+        const video = document.getElementById('concertVideo');
+        const unmuteBtn = document.getElementById('unmuteBtn');
+
+        // 1. Force Play on Load
+        window.addEventListener('load', () => {
+            const playPromise = video.play();
+            if (playPromise !== undefined) {
+                playPromise.then(_ => {
+                    // Autoplay started
+                }).catch(error => {
+                    console.log("Autoplay prevented");
+                });
+            }
+        });
+
+        // 2. Toggle Sound Logic
+        function toggleSound() {
+            if (video.muted) {
+                video.muted = false;
+                unmuteBtn.innerText = "Mute 🔇";
+                unmuteBtn.style.background = "#ffcccc";
+            } else {
+                video.muted = true;
+                unmuteBtn.innerText = "Tap for Sound 🔊";
+                unmuteBtn.style.background = "rgba(255, 255, 255, 0.9)";
+            }
+        }
+
+        // 3. Redirect when video ends
+        video.onended = function() {
+            redirect();
+        };
+
+        function redirect() {
+            window.location.href = 'reelscroll.html';
+        }
+    </script>
+</body>
+</html>

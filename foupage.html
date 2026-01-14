@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Surprise For You!</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600&family=Pacifico&family=Dancing+Script:wght@700;900&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: radial-gradient(circle farthest-corner at center, 
+                #fff8db 0%,   
+                #ffe4e1 30%,  
+                #ffccbc 60%,  
+                #fbc2eb 100%  
+            );
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            font-family: 'Poppins', sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* --- SCENE CONTROL --- */
+        #scene2 {
+            display: none;
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0; left: 0;
+            justify-content: center;
+            align-items: flex-end;
+        }
+
+        /* ================= SCENE 1 STYLES (GIFT) ================= */
+        canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; }
+
+        .gift-container {
+            position: relative; z-index: 10; cursor: pointer;
+            transition: transform 0.3s; display: flex; flex-direction: column; align-items: center;
+        }
+        .gift-container:hover { transform: scale(1.05); }
+
+        .gift-image {
+            width: 85%; max-width: 600px; height: auto;
+            animation: bounce 2s infinite ease-in-out;
+            filter: drop-shadow(0 15px 25px rgba(0,0,0,0.3));
+        }
+
+        .tap-hint {
+            color: #c70039; margin-top: 20px; font-size: 1.5rem; font-weight: bold;
+            animation: pulse 1.5s infinite; z-index: 10;
+            text-shadow: 1px 1px 2px rgba(255,255,255,0.8);
+        }
+
+        .final-message {
+            display: none; position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            background: linear-gradient(135deg, #ffdde1 0%, #c2e9fb 100%);
+            padding: 25px; border-radius: 20px; text-align: center;
+            width: 80%; max-width: 350px; max-height: 60vh;
+            box-shadow: 0 10px 50px rgba(100, 100, 100, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            z-index: 100; pointer-events: auto;
+            flex-direction: column; align-items: center; justify-content: space-between;
+        }
+        .final-message[style*="display: none"] { display: none !important; }
+
+        .final-message h1 {
+            font-family: 'Pacifico', cursive; color: #c70039; font-size: 2.2rem; margin: 0 0 10px 0;
+            text-shadow: 1px 1px 0px rgba(255,255,255,0.8); flex-shrink: 0;
+        }
+
+        .scrollable-text {
+            width: 100%; max-height: 200px; overflow-y: auto;
+            color: #444; font-size: 1rem; line-height: 1.6; font-weight: 600;
+            padding: 5px 10px; margin-bottom: 10px;
+            scrollbar-width: thin; scrollbar-color: #ff69b4 rgba(255,255,255,0.5);
+        }
+
+        #goToTreeBtn {
+            display: none; 
+            position: fixed; 
+            bottom: 40px;
+            left: 50%; 
+            transform: translateX(-50%); 
+            padding: 12px 35px; border: none; border-radius: 50px;
+            background-image: linear-gradient(to right, #ffafbd, #ffc3a0, #21D4FD);
+            background-size: 200% auto; color: white;
+            font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 1.1rem;
+            text-transform: uppercase; letter-spacing: 1px; cursor: pointer;
+            box-shadow: 0 5px 15px rgba(255, 175, 189, 0.4); z-index: 1000;
+            transition: 0.5s; 
+            animation: floatBtnCentered 3s ease-in-out infinite;
+        }
+        #goToTreeBtn:hover { background-position: right center; transform: translate(-50%, 0) scale(1.05); }
+
+
+        /* ================= SCENE 2 STYLES (TREE) ================= */
+
+        .page-title {
+            position: absolute; top: 20px; width: 100%; text-align: center;
+            font-family: 'Dancing Script', cursive; line-height: 1.2; z-index: 10;
+        }
+        .line-wrapper { display: block; margin-bottom: 5px; }
+
+        .char { opacity: 0; display: inline-block; transform: scale(0.5); transition: opacity 0.2s, transform 0.2s; }
+        .char.visible { opacity: 1; transform: scale(1); }
+
+        .gradient-char {
+            font-size: 1.75rem; font-weight: 900;
+            background: linear-gradient(to right, #89f7fe, #66a6ff, #a18cd1, #cf91ff);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+            filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.1));
+        }
+        .emoji-char { font-size: 1.5rem; filter: drop-shadow(0 2px 5px rgba(0,0,0,0.2)); font-style: normal; }
+
+        .rain-drop {
+            position: fixed; width: 4px; height: 15px; background: #66a6ff;
+            border-radius: 50%; pointer-events: none; z-index: 20;
+            top: -20px; transition: top 0.4s ease-in; box-shadow: 0 0 5px #66a6ff;
+        }
+
+        .tree-container {
+            position: relative; width: 100%; max-width: 600px; height: 85vh;
+            display: flex; justify-content: center; align-items: flex-end;
+        }
+        #treeImg { width: 100%; height: auto; max-height: 100%; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.3)); z-index: 1; }
+
+        .memory {
+            position: absolute; width: 60px; height: 80px; background: #fff; padding: 5px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2); border-radius: 4px; cursor: pointer; z-index: 2;
+            transition: transform 0.3s, z-index 0.3s;
+            transform-origin: center -25px;
+            animation: mainSwing 3.5s infinite cubic-bezier(0.455, 0.03, 0.515, 0.955) alternate;
+        }
+        .memory::before {
+            content: ''; position: absolute; top: -25px; left: 50%; width: 4px; height: 25px;
+            border-left: 2px solid rgba(101, 67, 33, 0.8); border-radius: 50% 0 0 0; transform: translateX(-50%);
+        }
+        .memory img {
+            width: 100%; height: 100%; object-fit: cover; border-radius: 2px;
+            transform-origin: top center;
+            animation: secondarySwing 3.5s infinite cubic-bezier(0.455, 0.03, 0.515, 0.955) alternate;
+            animation-delay: -0.5s;
+        }
+        .memory:hover { transform: scale(1.3) !important; z-index: 100; animation-play-state: paused; }
+        .memory:hover img { animation-play-state: paused; }
+
+        #mem1 { top: 35%; left: 23%; animation-delay: -1s; } #mem1 img { animation-delay: -1.5s; }
+        #mem2 { top: 30%; left: 53%; animation-delay: -2.5s; } #mem2 img { animation-delay: -3s; }
+        #mem3 { top: 45%; left: 72%; animation-delay: -0.5s; } #mem3 img { animation-delay: -1s; }
+        #mem4 { top: 55%; left: 20%; animation-delay: -3s; } #mem4 img { animation-delay: -3.5s; }
+        #mem5 { top: 61%; left: 50%; animation-delay: -1.5s; } #mem5 img { animation-delay: -2s; }
+
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-30px); } }
+        @keyframes pulse { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
+        @keyframes beat { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.2); } }
+        @keyframes popIn { 0% { transform: translate(-50%, -50%) scale(0); } 80% { transform: translate(-50%, -50%) scale(1.1); } 100% { transform: translate(-50%, -50%) scale(1); } }
+        @keyframes mainSwing { 0% { transform: rotate(6deg); } 100% { transform: rotate(-6deg); } }
+        @keyframes secondarySwing { 0% { transform: rotate(2deg) translateX(1px); } 100% { transform: rotate(-2deg) translateX(-1px); } }
+
+        @keyframes floatBtnCentered {
+            0%, 100% { transform: translate(-50%, 0); }
+            50% { transform: translate(-50%, -5px); }
+        }
+
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 2000; justify-content: center; align-items: center; backdrop-filter: blur(5px); }
+        .modal-content { background: white; padding: 20px; border-radius: 15px; text-align: center; width: 80%; max-width: 350px; animation: popIn 0.4s; }
+        .modal-img { width: 100%; border-radius: 10px; margin-bottom: 15px; border: 4px solid #ffd700; }
+        .modal-text { font-size: 1.1rem; color: #444; margin-bottom: 15px; }
+        .close-btn { background: #ff4757; color: white; border: none; padding: 8px 20px; border-radius: 20px; cursor: pointer; font-weight: bold; }
+
+        .restart-btn {
+            position: absolute; bottom: 20px; right: 20px;
+            background: rgba(255, 255, 255, 0.8); padding: 10px 15px;
+            border-radius: 50px; text-decoration: none; color: #333;
+            font-size: 0.8rem; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 20; font-weight: 600;
+        }
+        .next-final-btn {
+            position: absolute; bottom: 70px; right: 20px;
+            padding: 10px 20px; border: none; border-radius: 50px;
+            background-image: linear-gradient(to right, #ffafbd, #ffc3a0, #21D4FD);
+            color: white; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 1rem;
+            cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.2); z-index: 20;
+            text-decoration: none; 
+            animation: floatBtnSide 3s ease-in-out infinite;
+        }
+        
+        @keyframes floatBtnSide {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+    </style>
+</head>
+<body>
+
+    <audio id="song4" src="song4.mp3" loop></audio>
+    <audio id="song5" src="song5.mp3"></audio>
+
+    <div id="scene1">
+        <canvas id="fireworks"></canvas>
+        <div class="gift-container" id="giftBox" onclick="openGift(event)">
+            <img src="giftbox4.png" alt="Open Me" class="gift-image">
+            <div class="tap-hint">Tap to Open 🎁</div>
+        </div>
+
+        <div class="final-message" id="msgCard" onclick="event.stopPropagation()">
+            <h1>Surprise!</h1>
+            <div class="scrollable-text">
+                Le aa gaya me vapas apni bak-bak krne 😂<br>ye meri bs ek chhoti si koshish thi tera  yeh din khaas bnane ki ❤️😘<br><br>i know you have been continuously fighting ur own battles on a daily basis 🥲i know that meri hi tarah even u don't like this shit lyf 🥲<br><br>but i want you to know .....not only know,,,🫶 but set it right in ur mind and heart that I don't believe ur lyf to be something waste or not good🫶 ....<br><br>instead this day is of a very great significance to mehh 🥹😀<br><br>iss din mujhe meri baate smjhne vala koi mila, jo meri bakeiti seh leti h 😭😭, jo mere lows me mujhe chand pe bitha deti hai🥹,jo mere highs me chaar chaand laga deti, jo mere kisi ldki ko propose krne ki baat pr mujhe chane ke jhaad pe chdha deti h😂, jo mujhe weirdo nahi samjhti, jo mujhe judge nahi krti, jisne mujhe nastik se aastik me bdl dia🥹🫶, jo meri baate sunti h jb mere paas koi nahi hota ....  😭jiske paas me kbhi bhi kisi bhi chiz kisi bhi matter kisi bhi need ke liye dekh skta hu, can look up to 🥹🥹<br><br>🥹tu woh shaks h jo meri sbse pehli well wisher rahi hai..<br><br>🫶har festival har chiz me sbse pehla msg tera aata hai....<br><br>i dont know if there is something greater than being grateful to you❤️️, but if it is there, i would love to be that towards youhhh.... ❤️<br><br>Just know this that i have never judged you, me mazak me khilli udata hounga pr deep-down i feel how u feel🫶, what u wanna say, what hurts u, i always want to share ur burden, sorrows and pains🥹...<br>meri lyf me khushi non-existent entity hai, agar hoti to vo bhi tujhe de deta🥰🥰<br><br> 
+Itna hmesha yaad rkhiyo ki puri duniya bhi tere against ho jaaye tb bhi ye jaiuu rahega tere paas💞🤩....<br><br>koi bhi matter ho, koi bhi dikkat ho, kisi bhi chiz ke regarding open-up hona ho, stress dur krna ho, gapshap krni ho , chugli krni ho😂, bakeiti krni ho, burai maarni ho kisi ki😂, movie dekhni ho, kuchh bhi ho i am always there🥰🥰<br>chale aana meri chat me 😀<br>mujhe ek disorder h 😂main kisi ki chats unread pr nahi chhodta kabhi bhi ...so u know what to do 🥹😼😼❤️<br><br>
+9th to 12th tk sirf kaam chalau dost bne😂...aur fir 4 saal ke gap ke baad, tu meri sbse pehli dost bni 🥹❤️
+<br><br>
+Maybe vo 4 saal mere pas koi tha nahi apne dukhde sunane vala 🤣isliye tujhme mujhe me dikha, mere jesi hi gareeb, dukhiyaari 🥹❤️🫶, laachaar 🤣,aam ka achaar 🤣🤣aatma tujhme dikhi 😭🤣🤣❤️
+
+<br><br>
+Aachaar real me coincidentally isme aaya 😭😭tere baare me likhte likhte aachaar bhi bola mujhe ni mention kra to kya kiaaaaaa...... <br><br>🤣🤣Peak brainrot chl rha h mere note me 🤣🤣<br>isse random kuchh ni ho skta 🤣kaha mene emotional note shuru kia tha aur kaha ye bakchodi krne lg gya me 🤣🤣
+<br><br>
+Bolne ko to bhot kuch h abhi bhi pr tera time zyada waste kr rha hounga shyd 🥲🫶to chalo aage bdhte hai.....
+.<br>
+.<br>
+.<br>
+.<br>
+.<br>
+.<br>
+.<br>
+.<br>
+.<br>
+.<br>
+.<br>
+.<br>
+.<br>
+.<br>
+.<br>
+.<br>
+.<br>
+.<br>
+.<br>
+.<br>
+.<br>
+.<br>
+.<br>
+.<br>
+.<br>
+.<br>
+.<br>
+.<br>
+.<br>
+.<br>
+.<br>
+.<br>
+.<br>
+.<br>
+.<br>
+.<br>
+.<br>
+.<br>
+.<br>
+.<br>
+.<br>
+.<br>
+.<br>
+.<br>
+.<br>
+.<br>
+.<br>
+.<br>
+.<br>
+.<br>
+.<br>
+.<br>
+.<br>
+.<br>
+.<br>
+.<br>
+.<br>
+.<br>
+.<br>
+.<br>
+.<br>
+.<br>
+.<br>
+.<br>
+.<br>
+.<br>
+.<br>
+.<br>
+.<br>
+.<br>
+.<br>
+.<br>
+.<br>
+.<br>
+.<br>
+.<br>
+.<br>
+.<br>
+.<br>
+.<br>
+.<br>
+.<br>.<br>
+.<br>
+.<br>
+.<br>
+.<br>
+.<br>
+.<br>
+.<br>
+.<br>
+.<br>
+.<br>
+.<br>
+.<br>
+
+.<br>
+.<br>
+.<br>
+
+
+
+
+
+.<br>
+.<br>
+.<br>
+.<br>
+Oiiii 🥹🥹🥹Happyyyyyyyyyyyyyyy vala birthday reeee😭😭❤️💖💝💖💝❤️💛💜💚💙💗🥰😻😍🧡💚💙💗💖❤️💞💜🖤💛♥️❤️🖤🖤<br><br>sab rakhle 😭jitne dil mile sab add krdiye 😭😭😭
+<br><br>
+Hamesha khush rehna ❤️😘apna dhyan rakhna 🥹bhale hi me hou ya na hou ❤️love love lots of lob by jaiuu💖🥰🥰<br><br>i am missing uhh bhot saraaaaaaaaaaaaa 😭😭😭
+            </div>
+            <div style="flex-shrink:0;">
+                <div class="big-heart" style="font-size:2.5rem;animation:beat 1s infinite;">❤️</div>
+                <p style="font-size: 0.8rem; color: #666; margin-top: 10px;">- Jeetu</p>
+                <p style="font-size: 0.7rem; color: #888; margin-top: 5px;">(Tap outside to close card)</p>
+            </div>
+        </div>
+
+        <button id="goToTreeBtn" onclick="switchToTree()">Next Surprise ➡</button>
+    </div>
+
+    <div id="scene2">
+        <div class="page-title" id="titleContainer"></div>
+        
+        <div class="tree-container">
+            <img src="tree.png" alt="Tree" id="treeImg">
+            <div class="memory" id="mem1" onclick="showMemory('mem1.jpg', 'School ke din! 😂')"><img src="trim1.jpg"></div>
+            <div class="memory" id="mem2" onclick="showMemory('jeetu_pic.jpg', 'Hero! 😎')"><img src="trim2.jpg"></div>
+            <div class="memory" id="mem3" onclick="showMemory('mem2.jpg', 'Goa Trip! 🏖️')"><img src="trim4.jpg"></div>
+            <div class="memory" id="mem4" onclick="showMemory('cake.png', 'Sweet! 🎂')"><img src="trim3.jpg"></div>
+            <div class="memory" id="mem5" onclick="showMemory('giftbox4.png', 'BFF! ❤️')"><img src="trim5.jpg"></div>
+        </div>
+
+        <a href="fifpage.html" class="next-final-btn">Next ➡</a>
+        <a href="index.html" class="restart-btn">Start Again ↺</a>
+    </div>
+
+    <div class="modal" id="memoryModal" onclick="closeModal()">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <img src="" alt="Memory" id="modalImg" class="modal-img">
+            <p id="modalText" class="modal-text"></p>
+            <button class="close-btn" onclick="closeModal()">Close</button>
+        </div>
+    </div>
+
+    <script>
+        const song4 = document.getElementById('song4');
+        const song5 = document.getElementById('song5');
+        const scene1 = document.getElementById('scene1');
+        const scene2 = document.getElementById('scene2');
+        const box = document.getElementById('giftBox');
+        const msg = document.getElementById('msgCard');
+        const canvas = document.getElementById('fireworks');
+        const ctx = canvas.getContext('2d');
+        const nextBtn1 = document.getElementById('goToTreeBtn');
+        const titleContainer = document.getElementById('titleContainer');
+        const modal = document.getElementById('memoryModal');
+        const modalImg = document.getElementById('modalImg');
+        const modalText = document.getElementById('modalText');
+        
+        let isGiftOpen = false;
+        let particles = [];
+        let animationFrameId;
+
+        canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+
+        function Particle(x, y, color) {
+            this.x = x; this.y = y; this.color = color;
+            this.velocity = { x: (Math.random() - 0.5) * 8, y: (Math.random() - 0.5) * 8 };
+            this.alpha = 1; this.friction = 0.96;
+        }
+        Particle.prototype.draw = function() {
+            ctx.globalAlpha = this.alpha; ctx.beginPath(); ctx.arc(this.x, this.y, 3, 0, Math.PI * 2, false); ctx.fillStyle = this.color; ctx.fill();
+        }
+        Particle.prototype.update = function() {
+            this.velocity.x *= this.friction; this.velocity.y *= this.friction;
+            this.x += this.velocity.x; this.y += this.velocity.y;
+            this.alpha -= 0.01; this.draw();
+        }
+        function createFirework(x, y) {
+            const colors = ['#ff0000', '#ff00ff', '#0000ff', '#800080', '#e94560', '#ffd700', '#008000'];
+            const color = colors[Math.floor(Math.random() * colors.length)];
+            for (let i = 0; i < 50; i++) { particles.push(new Particle(x, y, color)); }
+        }
+        function animateFireworks() {
+            if(!isGiftOpen) return;
+            animationFrameId = requestAnimationFrame(animateFireworks);
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach((particle, index) => {
+                if (particle.alpha > 0) particle.update(); else particles.splice(index, 1);
+            });
+            if(Math.random() < 0.05) createFirework(Math.random() * canvas.width, Math.random() * canvas.height);
+        }
+
+        function openGift(event) {
+            if(event) event.stopPropagation();
+            isGiftOpen = true;
+            song4.volume = 0.8; 
+            // Ensures song starts and loops
+            song4.play().catch(e => console.log("Audio play failed", e));
+            
+            box.style.transform = "scale(0)"; setTimeout(() => { box.style.display = 'none'; }, 300);
+            animateFireworks();
+            createFirework(window.innerWidth/2, window.innerHeight/2);
+            setTimeout(() => { msg.style.display = 'flex'; msg.style.animation = 'popIn 0.5s forwards'; }, 300);
+        }
+
+        document.addEventListener('click', function() {
+            if(isGiftOpen && scene1.style.display !== 'none') {
+                isGiftOpen = false;
+                cancelAnimationFrame(animationFrameId);
+                ctx.clearRect(0, 0, canvas.width, canvas.height); particles = []; 
+                msg.style.display = 'none'; msg.style.animation = 'none';
+                box.style.display = 'flex'; 
+                setTimeout(() => { box.style.transform = "scale(1)"; box.style.opacity = "1"; }, 50);
+                nextBtn1.style.display = 'block';
+                // Note: song4 continues playing here because we didn't pause it
+            }
+        });
+
+        function switchToTree() {
+            // ONLY stop song 4 here
+            song4.pause(); 
+            song4.currentTime = 0;
+            
+            scene1.style.display = 'none'; scene2.style.display = 'flex';
+            song5.volume = 0.8; song5.play().catch(e => {});
+            initText(); setTimeout(startRainAnimation, 500);
+        }
+
+        const textLines = [
+            { text: "Mere Sabr", type: "gradient" }, { text: "Ka Fal", type: "gradient" }, { text: "🤣🫵🍊", type: "emoji" }
+        ];
+
+        function initText() {
+            titleContainer.innerHTML = ''; 
+            textLines.forEach(line => {
+                const lineDiv = document.createElement('div'); lineDiv.className = 'line-wrapper';
+                Array.from(line.text).forEach(char => {
+                    const span = document.createElement('span'); span.innerText = char; span.className = 'char';
+                    if(line.type === 'gradient') span.classList.add('gradient-char'); else span.classList.add('emoji-char');
+                    if(char === ' ') span.style.width = '20px';
+                    lineDiv.appendChild(span);
+                });
+                titleContainer.appendChild(lineDiv);
+            });
+        }
+
+        function startRainAnimation() {
+            const allChars = document.querySelectorAll('.char');
+            let delay = 0;
+            allChars.forEach((charSpan) => {
+                if(charSpan.innerText === ' ') { charSpan.classList.add('visible'); return; }
+                setTimeout(() => { spawnDropAndAnimate(charSpan); }, delay);
+                delay += 150;
+            });
+        }
+
+        function spawnDropAndAnimate(targetSpan) {
+            const rect = targetSpan.getBoundingClientRect();
+            const drop = document.createElement('div'); drop.className = 'rain-drop';
+            drop.style.left = (rect.left + rect.width / 2) + 'px'; drop.style.top = '-50px'; 
+            document.body.appendChild(drop); drop.offsetWidth; 
+            requestAnimationFrame(() => { drop.style.top = (rect.top + rect.height / 2) + 'px'; });
+            drop.addEventListener('transitionend', () => { drop.remove(); targetSpan.classList.add('visible'); });
+        }
+
+        function showMemory(imageSrc, text) {
+            modalImg.src = imageSrc; modalText.innerText = text; modal.style.display = 'flex';
+        }
+        function closeModal() { modal.style.display = 'none'; }
+        
+        window.addEventListener('resize', () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; });
+
+    </script>
+</body>
+</html>

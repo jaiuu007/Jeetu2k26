@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Magical Birthday Surprise</title>
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Poppins:wght@300;600&family=Dancing+Script:wght@700&family=Orbitron:wght@600&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            margin: 0; padding: 0;
+            background-color: #050510;
+            height: 100vh; width: 100vw;
+            overflow: hidden;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        /* --- SCENE 1: SPACE --- */
+        #spaceContainer {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 5; transition: opacity 0.8s ease;
+        }
+        #skyBg {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: url('sky.jpg') no-repeat center center/cover;
+        }
+        .space-text {
+            position: absolute; top: 80px; width: 100%; text-align: center;
+            font-family: 'Pacifico', cursive; color: white; font-size: 2.8rem;
+            text-shadow: 0 0 15px rgba(137, 247, 254, 0.8); z-index: 6;
+        }
+        .couple-container {
+            position: absolute; bottom: 160px; left: 50%;
+            transform: translateX(-50%); z-index: 6;
+            animation: personFloat 6s ease-in-out infinite;
+        }
+        .couple-img { height: 380px; width: auto; filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.4)); }
+
+        /* --- SCENE 2: GARDEN --- */
+        #gardenScene {
+            position: absolute; top: 100vh; left: 0; width: 100%; height: 100%;
+            background: url('garden.jpg') no-repeat center center/cover;
+            z-index: 8; box-shadow: 0 -20px 50px rgba(0,0,0,0.5);
+            display: flex; justify-content: center; align-items: center;
+        }
+
+        /* --- MAGICAL CATS --- */
+        .cat-common {
+            position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 75vw; z-index: 15; pointer-events: none; display: none;
+        }
+
+        #cat1 { transform: translate(-50%, -50%) scale(0.01); transition: opacity 0.8s ease, filter 0.8s ease; opacity: 0; }
+        #cat2 { opacity: 0; transition: opacity 1.5s ease; filter: drop-shadow(0 0 25px gold); }
+
+        @keyframes catGrow {
+            0% { transform: translate(-50%, -50%) scale(0.01); opacity: 0; }
+            10% { opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+        }
+
+        /* --- STYLISH NOTE --- */
+        #noteContainer {
+            position: absolute; top: 10%; width: 100%; text-align: center; z-index: 30; display: none;
+        }
+        .note-line {
+            font-family: 'Dancing Script', cursive; font-size: 1.8rem; color: #fff;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.8), 0 0 20px rgba(255, 215, 0, 0.5);
+            overflow: hidden; white-space: nowrap; margin: 5px auto; width: 0; border-right: 3px solid orange;
+        }
+
+        @keyframes typing { from { width: 0 } to { width: 100% } }
+        @keyframes blink-caret { from, to { border-color: transparent } 50% { border-color: orange; } }
+        .animate-line1 { animation: typing 3s steps(30, end) forwards, blink-caret .75s step-end infinite; }
+        .animate-line2 { animation: typing 3s steps(30, end) forwards 3.2s, blink-caret .75s step-end infinite; }
+
+        /* --- ROBOTIC BUTTON --- */
+        #finalBtn {
+            position: absolute;
+            bottom: 40px;
+            display: none;
+            padding: 12px 30px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1rem;
+            color: #00d2ff;
+            background: #1a1a2e;
+            border: 2px solid #00d2ff;
+            border-radius: 5px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            z-index: 100;
+            box-shadow: 0 0 15px #00d2ff, inset 0 0 10px #00d2ff;
+            transition: 0.3s;
+            text-decoration: none;
+            animation: neonPulse 1.5s infinite alternate;
+        }
+
+        @keyframes neonPulse {
+            from { box-shadow: 0 0 10px #00d2ff; }
+            to { box-shadow: 0 0 25px #00d2ff, 0 0 5px #fff; }
+        }
+
+        /* --- THE CAKE --- */
+        #cake {
+            position: absolute; bottom: -300px; left: 50%;
+            transform: translateX(-50%); width: 220px;
+            z-index: 20; transition: bottom 2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            filter: drop-shadow(0 0 15px rgba(255,255,255,0.5));
+        }
+
+        /* --- MOON SURFACE --- */
+        #moonContainer {
+            position: absolute; bottom: -80px; left: 50%;
+            transform: translateX(-50%); width: 140%;
+            display: flex; justify-content: center; z-index: 10;
+            cursor: grab; touch-action: none;
+        }
+        .moon-surface { width: 100%; max-width: 1400px; filter: drop-shadow(0 -10px 40px rgba(255, 255, 255, 0.6)); }
+
+        .star { position: absolute; background: white; border-radius: 50%; z-index: 2; animation: twinkle var(--duration) infinite; }
+        @keyframes twinkle { 0%, 100% { opacity: 0.2; transform: scale(1); } 50% { opacity: 0.8; transform: scale(1.3); } }
+        @keyframes personFloat { 0%, 100% { transform: translate(-50%, 0); } 50% { transform: translate(-50%, -25px); } }
+
+    </style>
+</head>
+<body onmousedown="startDrag(event)" onmousemove="drag(event)" onmouseup="endDrag()" ontouchstart="startDrag(event)" ontouchmove="drag(event)" ontouchend="endDrag()">
+
+    <audio id="song6" src="song6.mp3" loop preload="auto"></audio>
+    <audio id="song7" src="song7.m4a" loop preload="auto"></audio>
+
+    <div id="spaceContainer">
+        <div id="skyBg"></div>
+        <div id="starWrap"></div>
+        <div class="space-text">Humesha Sath... ✨</div>
+        <div class="couple-container">
+            <img src="couple.png" alt="We" class="couple-img">
+        </div>
+    </div>
+
+    <div id="gardenScene">
+        <div id="noteContainer">
+            <div id="line1" class="note-line">😼meow will be coming soon</div>
+            <div id="line2" class="note-line">to stay with youhhh🫵</div>
+        </div>
+
+        <img src="cat_walk.gif" id="cat1" class="cat-common">
+        <img src="cat_walk2.gif" id="cat2" class="cat-common">
+        <img src="cake2.png" id="cake" alt="Birthday Cake">
+
+        <a href="reel.html" id="finalBtn">At last</a>
+    </div>
+
+    <div id="moonContainer">
+        <img src="moon.png" alt="Moon Surface" class="moon-surface">
+    </div>
+
+    <script>
+        const s6 = document.getElementById('song6');
+        const s7 = document.getElementById('song7');
+        const moon = document.getElementById('moonContainer');
+        const garden = document.getElementById('gardenScene');
+        const space = document.getElementById('spaceContainer');
+        const cat1 = document.getElementById('cat1');
+        const cat2 = document.getElementById('cat2');
+        const cake = document.getElementById('cake');
+        const finalBtn = document.getElementById('finalBtn');
+        const noteContainer = document.getElementById('noteContainer');
+        const line1 = document.getElementById('line1');
+        const line2 = document.getElementById('line2');
+
+        let isDragging = false;
+        let startY;
+        let currentDeltaY = 0;
+        let isGardenActive = false;
+        const screenHeight = window.innerHeight;
+
+        // --- MUSIC TRIGGER FUNCTION ---
+        function tryPlayMusic() {
+            if (!isGardenActive && s6.paused) {
+                s6.play().catch(e => console.log("Still blocked"));
+            }
+        }
+
+        window.onload = () => { 
+            createStars(); 
+            s6.volume = 0.7;
+            s6.play().catch(() => console.log("Waiting for swipe/touch to play music..."));
+        };
+
+        function startDrag(e) {
+            isDragging = true; 
+            startY = e.pageY || e.touches[0].pageY;
+            moon.style.transition = 'none'; 
+            garden.style.transition = 'none'; 
+            space.style.transition = 'none';
+            
+            // Play music on touch start
+            tryPlayMusic();
+        }
+
+        function drag(e) {
+            // Trigger music on any movement
+            tryPlayMusic();
+
+            if (!isDragging) return;
+            const y = e.pageY || e.touches[0].pageY;
+            currentDeltaY = startY - y;
+            if (!isGardenActive) { if (currentDeltaY > 0) moveElements(currentDeltaY); }
+            else { if (currentDeltaY < 0) moveElements(screenHeight + currentDeltaY); }
+        }
+
+        function moveElements(yPos) {
+            yPos = Math.max(0, Math.min(yPos, screenHeight));
+            moon.style.bottom = (-80 + yPos) + 'px';
+            garden.style.top = (screenHeight - yPos) + 'px';
+            space.style.opacity = Math.max(0, 1 - (yPos / (screenHeight * 0.7)));
+            moon.style.opacity = (yPos > screenHeight * 0.9) ? '0' : '1';
+        }
+
+        function endDrag() {
+            isDragging = false;
+            moon.style.transition = garden.style.transition = 'all 0.5s cubic-bezier(0.23, 1, 0.32, 1)';
+            space.style.transition = 'opacity 0.5s ease';
+            if (!isGardenActive) { if (currentDeltaY > screenHeight / 2) activateGarden(); else deactivateGarden(); }
+            else { if (Math.abs(currentDeltaY) > screenHeight / 2) deactivateGarden(); else activateGarden(); }
+            currentDeltaY = 0;
+        }
+
+        function activateGarden() {
+            isGardenActive = true;
+            moon.style.bottom = (screenHeight + 100) + 'px'; moon.style.opacity = '0';
+            garden.style.top = '0px'; space.style.opacity = '0';
+            
+            s6.pause(); 
+            s7.volume = 0.8;
+            s7.play().catch(e => console.log(e));
+
+            // Cat transformation sequence
+            cat1.style.display = "block";
+            cat1.style.animation = "catGrow 12s forwards ease-out";
+            
+            setTimeout(() => {
+                cat1.style.filter = "brightness(5) drop-shadow(0 0 50px white)";
+                cat1.style.opacity = "0";
+                setTimeout(() => {
+                    cat1.style.display = "none";
+                    cat2.style.display = "block";
+                    setTimeout(() => { 
+                        cat2.style.opacity = "1"; 
+                        setTimeout(() => {
+                            cake.style.bottom = "120px";
+                            setTimeout(() => {
+                                noteContainer.style.display = "block";
+                                line1.classList.add('animate-line1');
+                                line2.classList.add('animate-line2');
+                                setTimeout(() => { line1.style.borderRight = "none"; }, 3000);
+                                setTimeout(() => { 
+                                    line2.style.borderRight = "none"; 
+                                    setTimeout(() => {
+                                        finalBtn.style.display = "block";
+                                        finalBtn.style.opacity = "0";
+                                        setTimeout(() => { finalBtn.style.opacity = "1"; }, 100);
+                                    }, 5000);
+                                }, 6500);
+                            }, 3000); 
+                        }, 2000); 
+                    }, 50);
+                }, 900);
+            }, 15000); 
+        }
+
+        function deactivateGarden() {
+            isGardenActive = false;
+            s7.pause();
+            s6.play();
+            moon.style.bottom = '-80px'; moon.style.opacity = '1';
+            garden.style.top = '100vh'; space.style.opacity = '1';
+            
+            cat1.style.display = "none"; cat1.style.opacity = "0"; cat1.style.animation = "none";
+            cat2.style.display = "none"; cat2.style.opacity = "0";
+            cake.style.bottom = "-300px";
+            noteContainer.style.display = "none";
+            line1.classList.remove('animate-line1'); line2.classList.remove('animate-line2');
+            finalBtn.style.display = "none";
+        }
+
+        function createStars() {
+            const starWrap = document.getElementById('starWrap');
+            for (let i = 0; i < 80; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                const size = Math.random() * 2 + 'px';
+                star.style.width = size; star.style.height = size;
+                star.style.left = Math.random() * 100 + '%'; star.style.top = Math.random() * 100 + '%';
+                star.style.setProperty('--duration', (Math.random() * 4 + 2) + 's');
+                starWrap.appendChild(star);
+            }
+        }
+    </script>
+</body>
+</html>

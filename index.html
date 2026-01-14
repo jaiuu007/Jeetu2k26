@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oii Jeetu!</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: linear-gradient(to bottom, #020024, #090979, #00d4ff); 
+            background: radial-gradient(circle at center, #1b2735 0%, #090a0f 100%);
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        #container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        canvas {
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 10; 
+        }
+
+        /* --- START OVERLAY --- */
+        #startOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: radial-gradient(circle, rgba(40,10,60,0.95) 0%, rgba(0,0,0,0.98) 100%);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+        }
+
+        .gift-container {
+            position: relative;
+            width: 120px;
+            height: 120px;
+            margin-bottom: 40px;
+            animation: megaBounce 2s infinite ease-in-out;
+        }
+        
+        .gift-box {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 80%;
+            background: linear-gradient(135deg, #ff3366, #ff5e89);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(255, 51, 102, 0.5);
+        }
+        
+        .gift-lid {
+            position: absolute;
+            top: 5%; left: -5%; width: 110%; height: 25%;
+            background: linear-gradient(135deg, #ff3366, #ff5e89);
+            border-radius: 10px;
+        }
+
+        .ribbon-vertical {
+            position: absolute; left: 50%; top: 0; bottom: 0; width: 20px;
+            transform: translateX(-50%); background: #ffd700;
+        }
+        
+        .ribbon-horizontal {
+             position: absolute; top: 45%; left: 0; right: 0; height: 20px;
+             background: #ffd700;
+        }
+
+        .bow {
+            position: absolute; top: -25%; left: 50%; width: 60px; height: 30px;
+            transform: translateX(-50%);
+        }
+        .bow:before, .bow:after {
+            content: ''; position: absolute; width: 40px; height: 40px; border-radius: 50%;
+            background: #ffd700;
+        }
+        .bow:before { left: -15px; transform: skew(20deg); }
+        .bow:after { right: -15px; transform: skew(-20deg); }
+
+        @keyframes megaBounce {
+            0%, 100% { transform: translateY(0) scale(1, 1); }
+            50% { transform: translateY(-30px) scale(0.9, 1.1); }
+            55% { transform: translateY(-30px) scale(1.1, 0.9); }
+            75% { transform: translateY(0) scale(1.05, 0.95); }
+        }
+
+        #startOverlay h2 {
+            font-family: 'Pacifico', cursive;
+            font-size: 3.5rem;
+            color: white;
+            text-align: center;
+            margin: 0;
+            background: linear-gradient(45deg, #FF0000, #FF7F00, #FFFF00, #00FF00, #0000FF, #4B0082, #9400D3);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gentlePulseText 2s ease-in-out infinite;
+        }
+
+        /* --- THE MOON DOM ELEMENT --- */
+        #moon-wrapper {
+            position: absolute;
+            top: 0; 
+            left: 0;
+            width: 0; height: 0;
+            z-index: 5; /* Behind Canvas (Tree) */
+            pointer-events: none;
+            transform: translate(-500px, -500px); /* Hidden initially */
+        }
+
+        .sticker-moon {
+            position: absolute;
+            transform: translate(-50%, 0);
+            /* 1.6x SIZE */
+            width: 288px; 
+            height: 288px;
+            background: radial-gradient(circle at 30% 30%, #fffdd0, #f8e473);
+            border-radius: 50%;
+            border: none; 
+            box-shadow: 0 0 80px rgba(255, 255, 220, 0.8), inset 0 0 32px rgba(255, 255, 200, 0.5);
+        }
+
+        .crater {
+            position: absolute;
+            background: rgba(220, 200, 160, 0.5);
+            border-radius: 50%;
+            box-shadow: inset 1px 1px 2px rgba(0,0,0,0.2);
+        }
+        .c1 { width: 70px; height: 70px; top: 25%; left: 20%; }
+        .c2 { width: 45px; height: 45px; top: 65%; left: 55%; }
+        .c3 { width: 38px; height: 38px; top: 35%; right: 25%; }
+
+        /* --- STARS --- */
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            opacity: 0.8;
+            z-index: 1;
+            animation: twinkle infinite ease-in-out;
+        }
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; transform: scale(0.8); }
+            50% { opacity: 1; transform: scale(1.2); box-shadow: 0 0 4px white; }
+        }
+
+        /* --- TEXT --- */
+        #topText {
+            position: absolute;
+            top: 40px;
+            left: 40px;
+            z-index: 100;
+            margin: 0;
+            font-family: 'Great Vibes', cursive;
+            font-size: 5rem; 
+            color: #ff9a9e; 
+            background: linear-gradient(to right, #ff9a9e, #fecfef, #ffd700);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 5px rgba(255, 105, 180, 0.8));
+            user-select: none;
+            pointer-events: none;
+        }
+
+        .anim-letter {
+            display: inline-block;
+            opacity: 0;
+            transform: translate(var(--x-start), var(--y-start)) scale(0.1);
+            transition: all 1.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .anim-letter.visible {
+            opacity: 1;
+            transform: translate(0, 0) scale(1);
+        }
+    </style>
+</head>
+<body>
+
+    <audio id="bgMusic" src="song.mp3" loop></audio>
+
+    <div id="startOverlay" onclick="startExperience()">
+        <div class="gift-container">
+            <div class="gift-box"><div class="ribbon-horizontal"></div></div>
+            <div class="gift-lid"><div class="ribbon-vertical"></div></div>
+            <div class="bow"></div>
+        </div>
+        <h2>Tap to Open Surprise!</h2>
+    </div>
+
+    <div id="container">
+        <h1 id="topText">Oii Jeetu!</h1>
+
+        <div id="moon-wrapper">
+            <div class="sticker-moon">
+                <div class="crater c1"></div>
+                <div class="crater c2"></div>
+                <div class="crater c3"></div>
+            </div>
+        </div>
+
+        <canvas id="canvas"></canvas>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const topTextElement = document.getElementById('topText');
+        const container = document.getElementById('container');
+        const audio = document.getElementById('bgMusic');
+        const overlay = document.getElementById('startOverlay');
+        const moonWrapper = document.getElementById('moon-wrapper');
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        // --- CONFIG ---
+        const config = {
+            maxDepth: 9,
+            growSpeed: 6,
+            branchColor: '#4a3b2a', 
+            heartColors: ['#ff4d6d', '#ff758f', '#ffb3c1', '#c9184a', '#ffe5ec', '#ff8fa3'],
+            ropeEmojis: ['🌺', '🌸', '💮', '🌼', '🏵️', '💠', '❇️']
+        };
+
+        // --- GLOBAL VARS ---
+        let branches = [];
+        let hearts = [];
+        let finaleTriggered = false; 
+        let animationStarted = false;
+        let animationState = 'falling'; 
+
+        // Seed
+        let seed = { x: canvas.width / 2, y: -20, vy: 0, gravity: 0.5, radius: 6, color: '#ffd700' };
+
+        // --- PHYSICS ROPE OBJECT ---
+        const rope = {
+            active: false,
+            anchorX: canvas.width * 0.8, 
+            anchorY: -20, 
+            length: 0,
+            targetLength: canvas.height * 0.2, 
+            angle: 0,
+            velocity: 0,
+            acceleration: 0,
+            gravity: 0.01,
+            damping: 0.99, 
+            elasticity: 0, 
+            endX: 0,
+            endY: 0
+        };
+
+        // --- TEXT PREP ---
+        const originalString = topTextElement.textContent;
+        topTextElement.innerHTML = ''; 
+        const spans = [];
+        [...originalString].forEach(char => {
+            const span = document.createElement('span');
+            span.innerHTML = char === ' ' ? '&nbsp;' : char;
+            span.className = 'anim-letter';
+            topTextElement.appendChild(span);
+            spans.push(span);
+        });
+
+        // --- 1. SHUFFLE EMOJIS ---
+        function shuffleEmojis() {
+            for (let i = config.ropeEmojis.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [config.ropeEmojis[i], config.ropeEmojis[j]] = [config.ropeEmojis[j], config.ropeEmojis[i]];
+            }
+        }
+
+        // --- STARS ---
+        function createStars() {
+            const starCount = 200; 
+            for (let i = 0; i < starCount; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                const size = Math.random() * 3 + 1; 
+                star.style.width = size + 'px';
+                star.style.height = size + 'px';
+                star.style.left = Math.random() * 100 + 'vw';
+                star.style.top = Math.random() * 100 + 'vh';
+                star.style.animationDuration = (Math.random() * 3 + 2) + 's'; 
+                container.appendChild(star);
+            }
+        }
+
+        // --- START ---
+        function startExperience() {
+            if (animationStarted) return;
+            animationStarted = true;
+            audio.volume = 0.7;
+            audio.play().catch(e => console.log(e));
+            overlay.style.opacity = '0';
+            overlay.style.transform = 'scale(1.2)'; 
+            setTimeout(() => { overlay.style.display = 'none'; }, 800);
+            requestAnimationFrame(mainLoop);
+        }
+
+        window.onload = () => { 
+            createStars();
+            shuffleEmojis(); 
+        };
+
+        // --- MAIN LOOP ---
+        function mainLoop() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            if (animationState === 'falling') {
+                updateSeed();
+            } else {
+                drawStaticTree();
+                if (animationState === 'growing') {
+                    growActiveBranches();
+                }
+            }
+
+            updateHearts();
+
+            if (rope.active) {
+                updateRopePhysics();
+            }
+
+            requestAnimationFrame(mainLoop);
+        }
+
+        function updateSeed() {
+            seed.vy += seed.gravity;
+            seed.y += seed.vy;
+            ctx.save(); ctx.translate(seed.x, seed.y); ctx.rotate(Math.atan2(seed.vy, 0) - Math.PI/2); 
+            ctx.fillStyle = seed.color; ctx.shadowBlur = 15; ctx.shadowColor = seed.color;
+            ctx.beginPath(); ctx.arc(0, 0, seed.radius, 0, Math.PI * 2);
+            ctx.moveTo(0, -seed.radius); ctx.lineTo(0, -seed.radius * 2.5); ctx.lineTo(seed.radius, -seed.radius * 0.5);
+            ctx.fill(); ctx.restore();
+
+            if (seed.y >= canvas.height - 10) {
+                animationState = 'growing';
+                createBranch(canvas.width / 2, canvas.height, -90, 18, 0);
+                setTimeout(triggerFinale, 10000); 
+            }
+        }
+
+        // --- TREE LOGIC ---
+        function drawStaticTree() {
+            branches.forEach(b => {
+                ctx.beginPath();
+                if(b.path.length > 0) {
+                    ctx.moveTo(b.path[0].x, b.path[0].y);
+                    for(let p of b.path) ctx.lineTo(p.x, p.y);
+                    ctx.lineTo(b.x, b.y);
+                } else {
+                    ctx.moveTo(b.startX, b.startY);
+                    ctx.lineTo(b.x, b.y);
+                }
+                ctx.strokeStyle = `hsl(30, 40%, ${20 + (b.depth * 5)}%)`;
+                ctx.lineWidth = b.width;
+                ctx.lineCap = 'round';
+                ctx.stroke();
+            });
+        }
+
+        function growActiveBranches() {
+            if (branches.length === 0 && !finaleTriggered && hearts.length > 0) {
+                 setTimeout(triggerFinale, 1000);
+            }
+
+            for (let i = branches.length - 1; i >= 0; i--) {
+                let b = branches[i];
+                if (!b.finished) {
+                    const rad = b.angle * (Math.PI / 180);
+                    b.x += Math.cos(rad) * config.growSpeed;
+                    b.y += Math.sin(rad) * config.growSpeed;
+                    b.length += config.growSpeed;
+                    b.angle += b.curve + Math.sin(b.length * 0.1);
+                    
+                    if (b.length % 5 < config.growSpeed) b.path.push({x: b.x, y: b.y});
+
+                    if (b.length >= b.targetLength) {
+                        b.finished = true;
+                        if (b.depth < config.maxDepth && b.width > 1.5) {
+                            createBranch(b.x, b.y, b.angle - 15 - Math.random() * 20, b.width * 0.75, b.depth + 1);
+                            createBranch(b.x, b.y, b.angle + 15 + Math.random() * 20, b.width * 0.75, b.depth + 1);
+                        } else {
+                            createHeart(b.x, b.y);
+                        }
+                    }
+                }
+            }
+        }
+
+        function createBranch(x, y, angle, width, depth) {
+            branches.push({
+                startX: x, startY: y, x: x, y: y, angle: angle, width: width, depth: depth, 
+                length: 0, targetLength: 70 + Math.random() * 30 - (depth * 5),
+                curve: (Math.random() - 0.5) * 5, finished: false, path: [{x:x, y:y}]
+            });
+        }
+
+        function createHeart(x, y) {
+            hearts.push({
+                x: x, y: y, size: 0, maxSize: 8 + Math.random() * 8,
+                color: config.heartColors[Math.floor(Math.random() * config.heartColors.length)],
+                speed: 0.3 + Math.random() * 0.3, rotation: (Math.random() - 0.5) * 60
+            });
+        }
+
+        function updateHearts() {
+            for (let h of hearts) {
+                if (h.size < h.maxSize) h.size += h.speed;
+                drawHeart(h.x, h.y, h.size, h.color, h.rotation);
+            }
+        }
+
+        function drawHeart(x, y, size, color, rotation) {
+            ctx.save(); ctx.translate(x, y); ctx.rotate(rotation * Math.PI / 180);
+            ctx.fillStyle = color; ctx.shadowBlur = 5; ctx.shadowColor = 'pink';
+            ctx.beginPath(); ctx.moveTo(0, 0); 
+            ctx.bezierCurveTo(-size / 2, -size / 2, -size, size / 3, 0, size);
+            ctx.bezierCurveTo(size, size / 3, size / 2, -size / 2, 0, 0);
+            ctx.fill(); ctx.restore();
+        }
+
+        // --- PHYSICS ROPE LOGIC ---
+        function updateRopePhysics() {
+            if (rope.length < rope.targetLength) {
+                rope.elasticity += 0.8; 
+                rope.length += rope.elasticity;
+                
+                if(rope.length > rope.targetLength + 10) {
+                     rope.elasticity *= -0.5; 
+                     rope.length = rope.targetLength + 10;
+                }
+            } else {
+                rope.length += (rope.targetLength - rope.length) * 0.1;
+            }
+
+            const wind = Math.sin(Date.now() * 0.001) * 0.0005;
+            rope.acceleration = (-1 * rope.gravity * Math.sin(rope.angle)) + wind;
+            rope.velocity += rope.acceleration;
+            rope.velocity *= rope.damping; 
+            rope.angle += rope.velocity;
+
+            rope.endX = rope.anchorX + (Math.sin(rope.angle) * rope.length);
+            rope.endY = rope.anchorY + (Math.cos(rope.angle) * rope.length);
+
+            moonWrapper.style.transform = `translate(${rope.endX}px, ${rope.endY}px)`;
+            moonWrapper.children[0].style.transform = `translate(-50%, 0) rotate(${-rope.angle}rad)`;
+
+            const midX = (rope.anchorX + rope.endX) / 2;
+            const sag = Math.abs(Math.sin(rope.angle)) * 30;
+            const midY = (0 + rope.endY) / 2 + sag;
+            const curveOff = rope.velocity * 500; 
+            const cpX = midX - curveOff;
+            const cpY = midY;
+
+            ctx.beginPath();
+            ctx.moveTo(rope.anchorX, 0);
+            ctx.quadraticCurveTo(cpX, cpY, rope.endX, rope.endY);
+            
+            ctx.strokeStyle = '#2d5a27'; 
+            ctx.lineWidth = 6;
+            ctx.stroke();
+
+            ctx.font = '24px serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+
+            const steps = 15; 
+            for (let i = 1; i < steps; i++) {
+                const t = i / steps;
+                const tt = t * t;
+                const u = 1 - t;
+                const uu = u * u;
+
+                const fx = uu * rope.anchorX + 2 * u * t * cpX + tt * rope.endX;
+                const fy = uu * 0 + 2 * u * t * cpY + tt * rope.endY;
+
+                const emoji = config.ropeEmojis[i % config.ropeEmojis.length];
+
+                ctx.save();
+                ctx.translate(fx, fy);
+                ctx.rotate(rope.angle);
+                ctx.fillText(emoji, 0, 0);
+                ctx.restore();
+            }
+        }
+
+        // --- TRIGGER FINALE (TEXT -> ROPE -> REDIRECT) ---
+        function triggerFinale() {
+            if (finaleTriggered) return; 
+            finaleTriggered = true;
+
+            // 1. Show Text
+            spans.forEach((span, index) => {
+                const randomX = (Math.random() - 0.5) * 1000;
+                const randomY = (Math.random() - 0.5) * 1000;
+                span.style.setProperty('--x-start', `${randomX}px`);
+                span.style.setProperty('--y-start', `${randomY}px`);
+                setTimeout(() => { span.classList.add('visible'); }, index * 100); 
+            });
+
+            // 2. Drop Moon (after 0.5s)
+            setTimeout(() => {
+                rope.active = true;
+                rope.velocity = 0.05; 
+                
+                // 3. AUTO REDIRECT (after 35 seconds)
+                setTimeout(() => {
+                    window.location.href = 'secpage.html';
+                }, 35000); 
+
+            }, 500);
+        }
+
+        window.onresize = () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            seed.x = canvas.width / 2;
+            rope.anchorX = canvas.width * 0.8;
+        };
+
+    </script>
+</body>
+</html>

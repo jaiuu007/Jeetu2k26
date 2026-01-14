@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Jeetu's Memory Lane</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Indie+Flower&family=Patrick+Hand&family=Dancing+Script:wght@700&family=Poppins:wght@600&family=Gloria+Hallelujah&display=swap" rel="stylesheet">
+
+    <script src="https://cdn.jsdelivr.net/npm/page-flip/dist/js/page-flip.browser.js"></script>
+
+    <style>
+        /* FIX: Ensure body takes full height and prevents scrolling overflow */
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        body {
+            /* CHANGED: Background Image */
+            background-image: url('bg3.jpeg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Patrick Hand', cursive;
+            touch-action: none; 
+        }
+
+        .book-stage {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            perspective: 2000px;
+            transform-origin: center center;
+            width: 100%;
+            height: 100%;
+            cursor: pointer; 
+        }
+
+        /* --- NEXT BUTTON --- */
+        #nextBtn {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 10px 25px;
+            border: none;
+            border-radius: 50px;
+            background-image: linear-gradient(to right, #ffafbd, #ffc3a0, #21D4FD);
+            background-size: 200% auto;
+            color: white;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(255, 175, 189, 0.4);
+            z-index: 1000;
+            transition: 0.3s;
+            animation: floatBtn 3s ease-in-out infinite;
+        }
+
+        @keyframes floatBtn {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(-5px); }
+        }
+
+        @media (orientation: landscape) {
+            #nextBtn { display: none !important; }
+        }
+
+        /* --- PAGE STYLES --- */
+        .my-page {
+            width: 350px;
+            height: 500px;
+            padding: 20px;
+            background-color: #fdfbf7;
+            border: 1px solid #c2b5a3;
+            overflow: hidden;
+            background-image: url('https://www.transparenttextures.com/patterns/paper.png');
+            backface-visibility: hidden; 
+        }
+
+        .my-page.-left {
+            box-shadow: inset -20px 0 30px -10px rgba(0,0,0,0.2);
+            border-right: 2px solid rgba(0,0,0,0.15);
+        }
+
+        .my-page.-right {
+            box-shadow: inset 20px 0 30px -10px rgba(0,0,0,0.2);
+            border-left: 2px solid rgba(0,0,0,0.15);
+        }
+
+        .my-page.hard {
+            background-color: #5d4037;
+            border: 4px solid #3e2723;
+            color: #ffcc80;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            background-image: repeating-linear-gradient(45deg, rgba(255,255,255,0.02) 0px, transparent 2px);
+        }
+
+        .my-page.hard.front-cover {
+            box-shadow: inset 15px 0 30px rgba(0,0,0,0.5); 
+            border-left: 6px solid #281815; 
+        }
+
+        .my-page.hard.back-cover {
+            box-shadow: inset -15px 0 30px rgba(0,0,0,0.5); 
+            border-right: 6px solid #281815; 
+        }
+
+        .book-title {
+            font-family: 'Dancing Script', cursive;
+            font-size: 3.5rem;
+            border: 2px solid #ffcc80;
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        /* --- PHOTO STYLES --- */
+        .polaroid {
+            background: white;
+            padding: 10px 10px 35px 10px; /* Big bottom padding for retro look */
+            box-shadow: 3px 3px 10px rgba(0,0,0,0.25);
+            width: fit-content;
+            max-width: 90%;
+            margin: 0 auto;
+            position: relative;
+            transition: transform 0.2s;
+        }
+        
+        .polaroid img { 
+            max-width: 100%; 
+            max-height: 280px;
+            display: block; 
+            border: 1px solid #eee;
+        }
+
+        .tape { 
+            position: absolute; 
+            width: 70px; height: 25px; 
+            background: rgba(255, 255, 255, 0.5); 
+            border-left: 2px dotted rgba(0,0,0,0.1);
+            border-right: 2px dotted rgba(0,0,0,0.1);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            z-index: 10;
+        }
+
+        .note { 
+            font-family: 'Gloria Hallelujah', cursive; /* Scribbly font */
+            font-size: 1.1rem; 
+            color: #2c3e50; 
+            line-height: 1.4; 
+            text-align: center;
+            margin-top: 15px;
+            transform: rotate(-1deg);
+        }
+
+        .chat-bubble { background: #dcf8c6; padding: 10px; border-radius: 10px; margin: 15px 0; font-family: sans-serif; font-size: 0.85rem; box-shadow: 1px 1px 3px rgba(0,0,0,0.1); position: relative; transform: rotate(1deg); }
+        .final-msg { font-size: 2rem; color: #d84315; text-align: center; margin-top: 40%; }
+
+    </style>
+</head>
+<body>
+
+    <div class="book-stage" id="stage">
+        <div id="book">
+            
+            <div class="my-page hard front-cover" data-density="hard">
+                <div class="book-title">Jeetu<br> Jaiuu<br> ki<br>Scrapbook</div>
+                <p style="margin-top: 20px; font-size: 1.2rem; color: #ffcc80;">Phone rotate krke bhi dekh skti h tu 🫣</p>
+            </div>
+
+            <div class="my-page -left">
+                <h3 style="text-align: center; margin-top: 50%; color: #8d6e63;">This book belongs to...</h3>
+                <h1 style="text-align: center; color: #d84315; font-family: 'Dancing Script';"> Sabse PYARI<br> & <br>The Coolest Person</h1>
+            </div>
+
+            <div class="my-page -right">
+                <h3 style="text-align: center;">Do you remember?</h3>
+                <div class="polaroid" style="transform: rotate(-3deg);">
+                    <div class="tape" style="top: -10px; left: 35%; transform: rotate(-2deg);"></div>
+                    <img src="mem1.jpg" alt="Memory 1">
+                </div>
+                <p class="note">Kya bnaya tha mene!🙈 'ullu' 🫵😂 Kitna accha lg rha tha aur kitni khushi ho rhi thi mujhe ye krte hue 🥹.</p>
+            </div>
+
+            <div class="my-page -left">
+                <h3 style="text-align: center;">jaiuu's fav wish</h3>
+                <div class="chat-bubble">
+                    <b>Happy new year jaiuu....Stepping in this new year new calendar new dates everything new but still with the old us with the same us and deeper bond....nya saal aapko bht khushiyaan de ....2026 brings you love, luck, success, prosperity, loyalty, happiness, joy and everything you want and wish for ....some days will be tough but don't forget we will and are stick together and face every up and down of life trusting and supporting each other...we are distance by place states cities but we are close by heart close by words and somewhere in universe jaiuu and jeetu are enjoying and there by each other...someday ek ghr banayenge paas paas 🤧hna...Anyway had so many memories and counting to see, live, and make to remember many more...Once again nye varsh ki bht bht shubhkamnaye usi purani sakhi ki taraf se ✨💌🍀 
+Khub khush raho, sada pdhte raho, family walo ka naam roshan krna or accha score krk job lekr hi nikalna thik hna nhi to ghr walo ka to nhi pta me tujhe bhga bhga kr maarungi pure desh me smjhaa........stay strong and happy and healthy...agr yh saal bhi thoda tough rha to apn fr bhi saath he ek dusro ki shield bnkr right💗
+Love love
+Jeetu 🦉 😙
+                </div>
+                <div class="note">wish na bhejne k liye guilty feel <br>kr rha tha uss din🥲</div>
+            </div>
+
+            <div class="my-page -right">
+                <h3 style="text-align: center;">Ladybug-Catnoir🦇</h3>
+                <div class="polaroid" style="transform: rotate(2deg);">
+                    <div class="tape" style="top: -12px; left: 40%; transform: rotate(1deg);"></div>
+                    <img src="mem2.jpg" alt="Group Photo">
+                </div>
+                <p class="note">shyd yhi movie se apni baat start hui thi...uhh were crzy 4 this</p>
+            </div>
+
+            <div class="my-page -left">
+                <div class="polaroid" style="transform: rotate(-4deg); margin-top: 30px;">
+                    <div class="tape" style="top: -15px; left: 20%; transform: rotate(-5deg);"></div>
+                    <img src="mem3.jpg" alt="Random Memory">
+                </div>
+                <p class="note" style="margin-top: 20px; color: #e91e63;">I have goldfish's memory🥲but<br> maybe this was our first <br>vdo/moview call😉🥹</p>
+            </div>
+
+            <div class="my-page -right">
+                <div class="polaroid" style="transform: rotate(3deg); margin-top: 50px;">
+                    <div class="tape" style="top: -10px; right: 20%; transform: rotate(5deg);"></div>
+                    <img src="mem4.jpg" alt="Random Memory">
+                </div>
+                <p class="note" style="text-align: right; margin-right: 10px;">mera first gift 😭😭<br>personally drawn by Jeetu🥹❤️🤌✍</p>
+            </div>
+
+            <div class="my-page -left">
+                <h3 style="text-align: center; color: #555;">SOD khudko tha, fir mujhe bhi dedia🤧🤣🙈</h3>
+                <div class="polaroid" style="transform: rotate(1deg); margin-left: -10px;">
+                    <div class="tape" style="top: -12px; left: 45%;"></div>
+                    <img src="mem5.jpg" alt="Random Memory">
+                </div>
+                <p class="note">mujhe Narcissist bnane me aapka <br>pura haath h 🙂😈ab kon hi mujhe <br>approach kregii 😭😭</p>
+            </div>
+
+            <div class="my-page -right">
+                <div class="polaroid" style="transform: rotate(-5deg); margin-top: 20px;">
+                    <div class="tape" style="top: -10px; left: 10%; transform: rotate(-10deg);"></div>
+                    <img src="mem6.jpg" alt="Random Memory">
+                </div>
+                <p class="note" style="color: #3f51b5;"><br>thande mausam me mausambi arts🤧🥹ufff</p>
+            </div>
+
+            <div class="my-page -left">
+                <div class="polaroid" style="transform: rotate(4deg); margin-top: 40px;">
+                    <div class="tape" style="top: -10px; right: 30%; transform: rotate(2deg);"></div>
+                    <img src="mem7.jpg" alt="Random Memory">
+                </div>
+                <p class="note">ye 2nd time koi flower h jo fav<br> bn gya🪻..campus me raste me <br>jb bhi dikhta h vo <br>din yad aa jate h🥹</p>
+            </div>
+
+            <div class="my-page -right">
+                <h3 style="text-align: left; margin-left: 20px; font-family:'Indie Flower'">Lekhan-pathan ✨</h3>
+                <div class="polaroid" style="transform: rotate(-2deg);">
+                    <div class="tape" style="top: -12px; left: 50%;"></div>
+                    <img src="mem8.jpg" alt="Random Memory">
+                </div>
+                <p class="note">isme jo pink covered book dikh rhi, vo abhi bhi use kr rha✍👀</p>
+            </div>
+
+            <div class="my-page -left">
+                <div class="polaroid" style="transform: rotate(6deg); margin-top: 10px;">
+                    <div class="tape" style="top: -15px; left: 10%; transform: rotate(-3deg);"></div>
+                    <img src="mem9.jpg" alt="Random Memory">
+                </div>
+                <p class="note" style="margin-top: 10px;"><br><br>I know you do care🫶️❤️😊</p>
+            </div>
+
+            <div class="my-page -right">
+                <div class="polaroid" style="transform: rotate(-3deg); margin-top: 60px;">
+                    <div class="tape" style="top: -10px; right: 10%; transform: rotate(10deg);"></div>
+                    <img src="mem10.jpg" alt="Random Memory">
+                </div>
+                <p class="note">Still safe in possession in possessive way😼🥹 </p>
+            </div>
+
+            <div class="my-page -left">
+                <div style="text-align: center; margin-bottom: 10px; font-size: 1.5rem;">😘</div>
+                <div class="polaroid" style="transform: rotate(2deg);">
+                    <div class="tape" style="top: -10px; left: 30%;"></div>
+                    <img src="mem11.jpg" alt="Random Memory">
+                </div>
+                <p class="note" style="color: #ff5722;">tujhe hasi aa rhi hogi dekhke ab🤣😗</p>
+            </div>
+
+            <div class="my-page -right">
+                <div class="polaroid" style="transform: rotate(-5deg); margin-top: 30px;">
+                    <div class="tape" style="top: -12px; left: 20%; background: rgba(255, 200, 200, 0.6);"></div>
+                    <img src="mem12.jpg" alt="Random Memory">
+                </div>
+                <p class="note">motu🥹</p>
+            </div>
+
+            <div class="my-page -left">
+                <h3 style="transform: rotate(-10deg); text-align: center;">tingu badmash🔪...</h3>
+                <div class="polaroid" style="transform: rotate(5deg);">
+                    <div class="tape" style="top: -10px; right: 40%;"></div>
+                    <img src="mem13.jpg" alt="Random Memory">
+                </div>
+                <p class="note">"main to bchpan se hi kyuut hu ji💅"</p>
+            </div>
+
+            <div class="my-page -right">
+                <div class="polaroid" style="transform: rotate(-2deg); margin-top: 50px;">
+                    <div class="tape" style="top: -10px; left: 10%; transform: rotate(-5deg);"></div>
+                    <img src="mem14.jpg" alt="Random Memory">
+                </div>
+                <p class="note" style="color: #009688;">"tingu kese bola be👽😾<br>🔪chakku ghop dungi":fav chakku🤣</p>
+            </div>
+
+            <div class="my-page -left">
+                <div class="polaroid" style="transform: rotate(4deg); margin-top: 20px;">
+                    <div class="tape" style="top: -15px; right: 15%; transform: rotate(5deg);"></div>
+                    <img src="mem15.jpg" alt="Random Memory">
+                </div>
+                <p class="note">mene ye fek dia tha to<br> tu chilla rhi thi🥲🤣</p>
+            </div>
+
+            <div class="my-page -right">
+                <div class="polaroid" style="transform: rotate(-4deg); margin-top: 40px;">
+                    <div class="tape" style="top: -10px; left: 35%;"></div>
+                    <img src="mem16.jpg" alt="Random Memory">
+                </div>
+                <p class="note">"main heroine <br>huuuuuu"💅😗😼</p>
+            </div>
+
+            <div class="my-page -left">
+                <h3 style="text-align: center; color: #e67e22;">One Last Pic</h3>
+                <div class="polaroid" style="transform: rotate(2deg);">
+                    <div class="tape" style="top: -12px; right: 30%;"></div>
+                    <img src="mem17.jpg" alt="Random Memory">
+                </div>
+                <p class="note">I miss you re😭😭🤧<br>miss playing vid ur choti <br>more than that❤️😭</p>
+            </div>
+
+            <div class="my-page -right">
+                <div class="final-msg">
+                    Happy Birthday<br>Jeetudi❤️
+                </div>
+                <p class="note">meri ullu 🦉 <br>
+                meri jaadu 👽 <br>
+                meri motu 🐼<br>meri cutie si chudail 💝🪄</p>
+                <p style="text-align: center; margin-top: 50px; opacity: 0.5;">kiris ka gaana sunegaa?🤣😛...</p>
+            </div>
+
+            <div class="my-page hard back-cover" data-density="hard">
+                <div class="book-title" style="font-size: 2.5rem; border: none;">nai sunaunga kiris ka gaana 👽</div>
+                <p style="margin-top: 20px;">BieBie❤️Cutiepie</p>
+            </div>
+
+        </div>
+    </div>
+
+    <button id="nextBtn" onclick="window.location.href='foupage.html'">Next Chapter ➡</button>
+
+    <script>
+        // --- 1. SETUP AUDIO ---
+        const bgMusic = new Audio('song3.mp3');
+        bgMusic.loop = true;
+        bgMusic.volume = 0.6; 
+
+        const flipSoundSource = new Audio('flip.mp3');
+        flipSoundSource.volume = 1.0;
+
+        // --- 2. INTELLIGENT RESIZE LOGIC (FIXED) ---
+        function resizeBook() {
+            const stage = document.getElementById('stage');
+            const bookWidth = 700;  // Standard spread width (350*2)
+            const bookHeight = 500; // Standard height
+            
+            const winWidth = window.innerWidth;
+            const winHeight = window.innerHeight;
+
+            // Safe padding around the book
+            const padding = 20; 
+            
+            const availableW = winWidth - (padding * 2);
+            const availableH = winHeight - (padding * 2);
+
+            // Calculate scale to fit both width AND height
+            const scaleX = availableW / bookWidth;
+            const scaleY = availableH / bookHeight;
+
+            // Use the smaller scale to ensure it fits inside the viewport without cutting
+            let scale = Math.min(scaleX, scaleY);
+
+            // Cap the max scale to avoid pixelation on large desktops
+            if (scale > 1.4) scale = 1.4;
+
+            stage.style.transform = `scale(${scale})`;
+        }
+
+        window.addEventListener('resize', resizeBook);
+        window.addEventListener('load', resizeBook);
+
+        // --- 3. BOOK LOGIC ---
+        document.addEventListener('DOMContentLoaded', function() {
+            const pageFlip = new St.PageFlip(document.getElementById('book'), {
+                width: 350,
+                height: 500,
+                size: 'fixed',
+                usePortrait: false, 
+                startPage: 0,
+                minWidth: 350, maxWidth: 350,
+                minHeight: 500, maxHeight: 500,
+                maxShadowOpacity: 0.5,
+                showCover: true,
+                mobileScrollSupport: false 
+            });
+
+            pageFlip.loadFromHTML(document.querySelectorAll('.my-page'));
+
+            pageFlip.on('flip', (e) => {
+                if(bgMusic.paused) {
+                    bgMusic.play().then(() => {
+                        console.log("Music started!");
+                    }).catch(err => console.log(err));
+                }
+                const soundClone = flipSoundSource.cloneNode();
+                soundClone.volume = 1.0;
+                soundClone.play().catch(e => {});
+            });
+        });
+
+        document.body.addEventListener('touchstart', function() {
+             if(bgMusic.paused) bgMusic.play().catch(e=>{});
+        }, { once: true });
+        
+        document.body.addEventListener('click', function() {
+             if(bgMusic.paused) bgMusic.play().catch(e=>{});
+        }, { once: true });
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Make a Wish!</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Pacifico&family=Poppins:wght@300;600&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: radial-gradient(circle farthest-corner at center, 
+                #fff0f6 0%,   
+                #ffe3ef 25%,  
+                #ffd1dc 50%,  
+                #e0f2ff 75%,  
+                #dceeff 100%  
+            );
+            background-blend-mode: overlay;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start; 
+            align-items: center;
+            padding-top: 50px; 
+            font-family: 'Poppins', sans-serif;
+            box-sizing: border-box;
+        }
+
+        /* --- MIC OVERLAY --- */
+        #micOverlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            cursor: pointer;
+            backdrop-filter: blur(5px);
+        }
+        #micOverlay h2 {
+            font-family: 'Pacifico', cursive;
+            font-size: 2.5rem;
+            animation: pulse 1.5s infinite;
+            text-shadow: 0 0 15px rgba(255, 192, 203, 0.8);
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        /* --- TITLES --- */
+        #mainTitle {
+            font-family: 'Pacifico', cursive;
+            font-size: 3.5rem; 
+            color: #fff;
+            text-align: center;
+            margin-bottom: 10px;
+            padding: 0 20px; /* Added padding */
+            width: 100%;
+            max-width: 100%; /* Prevent overflow */
+            
+            /* FIX FOR LONG WORDS */
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            
+            background: linear-gradient(to right, #89f7fe, #66a6ff, #89f7fe);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 8px rgba(137, 247, 254, 0.6));
+            
+            animation: floatText 3s ease-in-out infinite;
+            z-index: 10;
+            transition: all 0.5s ease;
+            line-height: 1.3; /* Improved line height */
+        }
+
+        .instruction {
+            color: #fff;
+            font-size: 1.4rem;
+            margin-bottom: 20px;
+            font-family: 'Poppins', sans-serif;
+            letter-spacing: 1px;
+            z-index: 10;
+            text-align: center;
+            font-weight: 600;
+            text-shadow: 0 2px 4px rgba(255, 105, 180, 0.6);
+            transition: opacity 0.5s;
+        }
+
+        /* --- STATUS FEEDBACK --- */
+        #status-box {
+            background: rgba(255, 255, 255, 0.3);
+            padding: 10px 20px;
+            border-radius: 20px;
+            margin-bottom: 40px; 
+            color: #fff;
+            font-family: monospace;
+            z-index: 10;
+            min-height: 20px;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            font-weight: bold;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+            transition: opacity 0.5s;
+        }
+
+        /* --- CAKE CONTAINER --- */
+        .cake-container-img {
+            position: relative;
+            width: 350px; 
+            height: auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            animation: floatCake 3s ease-in-out infinite;
+            transition: transform 1s ease, opacity 1s ease;
+            z-index: 5;
+        }
+
+        #cakeImg {
+            width: 100%;
+            height: auto;
+            filter: drop-shadow(0 0 30px rgba(137, 247, 254, 0.5));
+        }
+
+        @keyframes floatText {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+        @keyframes floatCake {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        /* --- CARD & CONFETTI --- */
+        #card-container {
+            display: none;
+            position: absolute;
+            bottom: 40px; 
+            left: 50%;
+            transform: translateX(-50%) scale(0);
+            
+            width: 320px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 10px 50px rgba(102, 166, 255, 0.4);
+            text-align: center;
+            color: #333;
+            z-index: 20;
+            animation: popIn 1s forwards;
+            backdrop-filter: blur(10px);
+        }
+
+        @keyframes popIn {
+            to { transform: translateX(-50%) scale(1); }
+        }
+
+        #jeetu-photo {
+            width: 100%; height: 250px; object-fit: cover;
+            border-radius: 10px; 
+            border: 5px solid #89f7fe;
+            margin-bottom: 15px;
+        }
+
+        .wish-signature {
+            font-family: 'Great Vibes', cursive;
+            font-size: 2rem; 
+            color: #66a6ff; 
+            margin-top: 10px;
+        }
+
+        #confetti {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 15;
+        }
+
+        /* --- NEXT BUTTON --- */
+        #nextBtn {
+            display: none; /* Hidden initially */
+            position: absolute;
+            bottom: 350px; 
+            right: 20px;
+            padding: 10px 25px;
+            border: none;
+            border-radius: 30px; 
+            background: linear-gradient(to right, #89f7fe, #66a6ff);
+            color: white;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(102, 166, 255, 0.5);
+            z-index: 30;
+            opacity: 0;
+            transition: opacity 1s ease, transform 0.2s;
+        }
+        #nextBtn:hover {
+            transform: scale(1.05);
+        }
+
+    </style>
+</head>
+<body>
+
+    <audio id="celebrationSong" src="song2.mp3"></audio>
+
+    <div id="micOverlay" onclick="initVoice()">
+        <h2>Tap to Start Magic ✨</h2>
+        <p>(Allow Microphone Access)</p>
+    </div>
+
+    <h1 id="mainTitle">Make a Wish!</h1>
+    
+    <p class="instruction">Speak the Password:<br>"Main Kitni Cute Hu ?"</p>
+    
+    <div id="status-box">Tap screen to start...</div>
+
+    <div class="cake-container-img" id="cake">
+        <img src="cake.png" alt="Birthday Cake" id="cakeImg">
+    </div>
+
+    <button id="nextBtn" onclick="window.location.href='thipage.html'">Next ➡</button>
+
+    <div id="card-container">
+        <img id="jeetu-photo" src="jeetu_pic.jpg" alt="Birthday Boy">
+        <p class="wish-text">
+            Happy vala B'day Jeetu!❤️🫶 <br>
+            May Krishna bless you ✋,me too 😌 (thoda baant lena plz🤧 meri bhi lgi pdi h)<br>
+            Meri bakbak aage milegi..abhi ke liye tata<br>
+            Let's make your birthday a little different than last time...
+            
+        </p>
+        <div class="wish-signature">Love you!</div>
+    </div>
+
+    <canvas id="confetti"></canvas>
+
+    <script>
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        let recognition;
+        let isCelebrated = false;
+
+        function initVoice() {
+            document.getElementById('micOverlay').style.display = 'none';
+            document.getElementById('status-box').innerText = "🔴 Listening...";
+
+            if (!SpeechRecognition) {
+                alert("Browser does not support Voice. Use Chrome.");
+                return;
+            }
+
+            recognition = new SpeechRecognition();
+            recognition.lang = 'en-IN'; 
+            recognition.continuous = true; 
+            recognition.interimResults = false;
+
+            recognition.onstart = function() {
+                console.log("Mic is ON");
+                document.getElementById('status-box').innerText = "🔴 Listening for: 'Main Kitni Cute Hu'";
+                document.getElementById('status-box').style.color = "#66a6ff"; 
+            };
+
+            recognition.onresult = function(event) {
+                const last = event.results.length - 1;
+                const transcript = event.results[last][0].transcript.toLowerCase();
+                
+                document.getElementById('status-box').innerText = `You said: "${transcript}"`;
+                document.getElementById('status-box').style.color = "#fff";
+
+                if (transcript.includes("main kitni cute") || 
+                    transcript.includes("mai kitni cute") || 
+                    transcript.includes("mein kitni cute") ||
+                    transcript.includes("me kitni cute") ||
+                    transcript.includes("man kitni cute") ||
+                    transcript.includes("main kitni cute hu") ||
+                    transcript.includes("mai kitni cute hu") ||
+                    transcript.includes("main kitni cute hoon")) {
+                    
+                    document.getElementById('status-box').innerText = "✅ PASSWORD ACCEPTED!";
+                    document.getElementById('status-box').style.color = "#00ff00";
+                    recognition.stop();
+                    celebrate();
+                } else {
+                    setTimeout(() => {
+                        if(!isCelebrated) {
+                             document.getElementById('status-box').innerText = "🔴 Try again: 'Main Kitni Cute Hu'";
+                             document.getElementById('status-box').style.color = "#66a6ff";
+                        }
+                    }, 2000);
+                }
+            };
+
+            recognition.onerror = function(event) {
+                console.log("Error: " + event.error);
+                document.getElementById('status-box').innerText = "Mic Error/Silence. Restarting...";
+            };
+
+            recognition.onend = function() {
+                if (!isCelebrated) {
+                    console.log("Restarting mic...");
+                    recognition.start();
+                }
+            };
+
+            recognition.start();
+        }
+
+        function celebrate() {
+            if (isCelebrated) return;
+            isCelebrated = true;
+
+            const song = document.getElementById('celebrationSong');
+            if(song) {
+                song.volume = 0.8;
+                song.play().catch(e => console.log("Audio play error:", e));
+            }
+
+            document.querySelector('.instruction').style.opacity = '0';
+            document.querySelector('.instruction').style.display = 'none'; 
+            document.getElementById('status-box').style.opacity = '0';
+            document.getElementById('status-box').style.display = 'none';
+            
+            const title = document.getElementById('mainTitle');
+            
+            // UPDATED TEXT
+            title.innerHTML = `Supercalifragilisticexpialidocious cute h tu <span style="background:none; -webkit-text-fill-color: initial; text-shadow:none;">🥰</span>`;
+            
+            // FIX: Reduced Font Size for mobile & Added Margin
+            title.style.fontSize = "2.0rem"; 
+            title.style.marginTop = "13px"; 
+            
+            const cake = document.getElementById('cake');
+            cake.style.transform = "translateY(200px) scale(0.5)";
+            cake.style.opacity = "0";
+
+            document.getElementById('card-container').style.display = 'block';
+
+            startConfetti();
+
+            setTimeout(() => {
+                const btn = document.getElementById('nextBtn');
+                btn.style.display = 'block';
+                setTimeout(() => {
+                    btn.style.opacity = '1';
+                }, 50);
+            }, 10000); 
+        }
+
+        // --- CONFETTI SCRIPT ---
+        const canvas = document.getElementById('confetti');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        const particles = [];
+        const colors = ['#89f7fe', '#66a6ff', '#ffb6c1', '#ffffff', '#ffd700'];
+
+        function startConfetti() {
+            for (let i = 0; i < 300; i++) {
+                particles.push({
+                    x: canvas.width / 2, y: canvas.height / 2,
+                    vx: (Math.random() - 0.5) * 20, vy: (Math.random() - 0.5) * 20 - 5, 
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    size: Math.random() * 10 + 5, gravity: 0.5
+                });
+            }
+            animateConfetti();
+        }
+
+        function animateConfetti() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (let i = 0; i < particles.length; i++) {
+                let p = particles[i];
+                p.x += p.vx; p.y += p.vy; p.vy += p.gravity; p.vx *= 0.99; 
+                ctx.fillStyle = p.color;
+                ctx.fillRect(p.x, p.y, p.size, p.size);
+                if(p.y > canvas.height) { particles.splice(i, 1); i--; }
+            }
+            if (particles.length > 0) { requestAnimationFrame(animateConfetti); }
+        }
+        
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+
+    </script>
+</body>
+</html>
