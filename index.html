@@ -116,7 +116,7 @@
             animation: gentlePulseText 2s ease-in-out infinite;
         }
 
-        /* --- THE MOON DOM ELEMENT --- */
+        /* --- THE MOON DOM ELEMENT (IMAGE REPLACEMENT) --- */
         #moon-wrapper {
             position: absolute;
             top: 0; 
@@ -133,21 +133,17 @@
             /* 1.6x SIZE */
             width: 288px; 
             height: 288px;
-            background: radial-gradient(circle at 30% 30%, #fffdd0, #f8e473);
-            border-radius: 50%;
-            border: none; 
-            box-shadow: 0 0 80px rgba(255, 255, 220, 0.8), inset 0 0 32px rgba(255, 255, 200, 0.5);
+            
+            /* IMAGE STYLING */
+            object-fit: cover;
+            border-radius: 50%; /* Makes square JPG round */
+            
+            /* GLOWING EFFECT */
+            box-shadow: 
+                0 0 50px rgba(255, 255, 255, 0.6), 
+                0 0 100px rgba(255, 255, 220, 0.4),
+                inset 0 0 20px rgba(255, 255, 255, 0.5);
         }
-
-        .crater {
-            position: absolute;
-            background: rgba(220, 200, 160, 0.5);
-            border-radius: 50%;
-            box-shadow: inset 1px 1px 2px rgba(0,0,0,0.2);
-        }
-        .c1 { width: 70px; height: 70px; top: 25%; left: 20%; }
-        .c2 { width: 45px; height: 45px; top: 65%; left: 55%; }
-        .c3 { width: 38px; height: 38px; top: 35%; right: 25%; }
 
         /* --- STARS --- */
         .star {
@@ -210,11 +206,7 @@
         <h1 id="topText">Oii Jeetu!</h1>
 
         <div id="moon-wrapper">
-            <div class="sticker-moon">
-                <div class="crater c1"></div>
-                <div class="crater c2"></div>
-                <div class="crater c3"></div>
-            </div>
+            <img src="moon2.jpg" class="sticker-moon" alt="Moon">
         </div>
 
         <canvas id="canvas"></canvas>
